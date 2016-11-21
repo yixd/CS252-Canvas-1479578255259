@@ -7,7 +7,7 @@ body,html {
 	height: 100%;
 	margin: 0 auto;
 	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-	color: #ffffff;
+	color: #fff;
     overflow: hidden;
 }
 
@@ -20,14 +20,6 @@ a:hover {
 	text-decoration: underline;
 }
 
-.newappIcon {
-	padding-top: 10%;
-	display: block;
-	margin: 0 auto;
-	padding-bottom: 2em;
-	max-width:200px;
-}
-
 h1 {
 	font-weight: bold;
 	font-size: 2em;
@@ -35,16 +27,6 @@ h1 {
 
 .blue {
 	color: #00aed1;
-}
-
-th {
-	border-bottom: 0px solid #000;
-    border: 0px auto;
-}
-
-th, td {
-	align-content: center;
-	padding: 0 auto;
 }
 
 .env-var {
@@ -58,30 +40,54 @@ th, td {
     border-style: inset;
 }
 
-table {
-	table-layout: inherit;
-	width: 100%;
-	word-wrap: break-word;
-	padding: 0 auto;
-}
-.chat {
-    height: auto;
-}
-
-#main {
+#wrapper {
     width: 100%;
-    margin: 0 auto;
+    height: 550px;
 }
-
+.divs {
+    float: left;
+    height: 500px;
+}
+#chat {
+    background-color: aliceblue;
+    margin: 10px;
+    width: 250px;
+    display: table;
+    text-align: center;
+    color: black;
+        display: inline-block;
+    word-wrap: break-word;
+}
+#msgarea {
+    overflow: auto;
+    text-align: left;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: aliceblue;
+    height: 441px;
+}
 form {
-     background: #000;
-     padding: 3px;
-     position: fixed;
-     bottom: 0; 
+    background: #000;
+    padding: 3px;
+    position: absolute;
+    width: 244px;
+    display: table-cell;
+    vertical-align: bottom;
 }
 form input {
-    border: 0; padding: 10px;
+    border: 0; padding: 9px 13px 9px 13px;
 }
 form button {
-    background: rgb(130, 224, 255); border: none; padding: 10px;
+    background: rgb(130, 224, 255); border: none; padding: 9px;
+}
+#chatbox {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+#chatbox li {
+    padding: 5px 10px;
+}
+#chatbox li:nth-child(odd) {
+    background-color: darkgrey;
 }

@@ -11,38 +11,26 @@
 	<script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="script.js"></script>
-	<script> var socket = io(); </script>
   </head>
 
-  <body>
+  <body ondragstart="return false;" ondrop="return false;">
     <h1 class="game_title">Guess LOL</h1>
-    <div id="main">
-        <table>
-          <tr>
-            <td>
-              <p>HINT HERE!</p>
-              <canvas id="canv" width="650" height="450" onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()">Your browser does not support the canvas element.</canvas>
-            </td>
-            <td style= "width:30%">
-              <div id="chat">
-                  <ul id="chatbox">
-                      <li>haha</li>
-                      <li>??</li>
-                  </ul>
-                  <form id="chatform">
-                      <input id="msg" type="text" autocomplete="off" />
-                      <button>Send</button>
-                  </form>
-              </div>
-            </td>
-            <td style= "width:20%">
-                <div id="stat">
-                  <h1 id="message">Hello World!</h1>
-                  <p class='description'></p> Thanks for creating a <span class = "blue">NodeJS Starter Application</span>.
-                </div>
-            </td>
-          </tr>
-        </table>
+    <div id="wrapper">
+        <div id="draw" class="divs">
+          <div id="cursors"></div>
+          <canvas id="canv" width="650" height="455">Your browser does not support the canvas element.</canvas><p id="zobc"></p>
+            <!--onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()"-->
+        </div>
+        <div id="chat" class="divs">
+            <div id="msgarea"><ul id="chatbox"></ul></div>
+            <form action="">
+              <input id="msg" autocomplete="off" /><button>Send</button>
+            </form>
+        </div>
+        <div id="stat" class="divs">
+          <h1 id="message">Hello World!</h1>
+          <p class='description'></p> Thanks for creating a <span class = "blue">NodeJS Starter Application</span>.
+        </div>
     </div>
   </body>
 
