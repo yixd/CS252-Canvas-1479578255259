@@ -3,9 +3,9 @@
 ###Description: This is a simple game of pictionary that allows multiple players at the same time.
 ###Technology: NodeJS, Bootstrap, HTML5, JavaScript, CSS, Socket.io
 ###Authors:
-- Minghao Guo @minaaa1003
-- Yixuan Ding @yixd
-- Ziming Dong @dongzm1201
+- [Minghao Guo](https://github.com/minaaa1003)
+- [Yixuan Ding](https://github.com/yixd)
+- [Ziming Dong](https://github.com/dongzm1201) 
 
 
 ###To be done(in 'needed for now' ascending order, roughly:
