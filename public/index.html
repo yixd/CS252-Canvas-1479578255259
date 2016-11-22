@@ -2,10 +2,12 @@
 <html>
 
   <head>
-    <title>NodeJS Starter Application</title>
+    <title>Ooops</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/normalize.css">
+    <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
     <link rel="stylesheet" href="stylesheets/style.css">
     <!--script src="https://cdn.socket.io/socket.io-1.4.5.js"></script-->
 	<script src="/socket.io/socket.io.js"></script>
@@ -14,24 +16,24 @@
   </head>
 
   <body ondragstart="return false;" ondrop="return false;">
-    <h1 class="game_title">Guess LOL</h1>
+    <h1 class="game_title"></h1>
     <div id="wrapper">
         <div id="draw" class="divs">
           <div id="cursors"></div>
-          <canvas id="canv" width="650" height="455">Your browser does not support the canvas element.</canvas><p id="zobc"></p>
+          <canvas id="canv" width="800" height="600">Your browser does not support the canvas element.</canvas><p id="zobc"></p>
             <!--onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()"-->
         </div>
         <div id="chat" class="divs">
-            <div id="msgarea"><ul id="chatbox"></ul></div>
-            <form action="">
-              <input id="msg" autocomplete="off" /><button>Send</button>
+            <div class="chat-header">
+            </div>
+            <div id="msgarea">
+            </div>
+            <form class="send" action="">
+              <input id="msg" autocomplete="off" type="text" placeholder="enter" />
             </form>
         </div>
-        <div id="stat" class="divs">
-          <h1 id="message">Hello World!</h1>
-          <p class='description'></p> Thanks for creating a <span class = "blue">NodeJS Starter Application</span>.
-        </div>
     </div>
+    <div id="welcome"><h1>WELCOME!</h1><form class="form-name"><input id="input-name" autocomplete="off" type="text" placeholder="enter your name"/></form></div>
   </body>
 
 </html>

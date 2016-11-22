@@ -1,14 +1,20 @@
-# Node.js Starter Overview
+CS 252 README
+Minghao Guo: guo288@purdue.edu
+Yixuan Ding: ding115@purdue.edu
+Ziming Dong: dong137@purdue.edu
 
-The Node.js Starter demonstrates a simple, reusable Node.js web application based on the Express framework.
+Project Name: Pictionaries
+Description: This is a simple game of pictionary that allows multiple players at the same time.
+Technology: NodeJS, Bootstrap, HTML5, JavaScript, CSS, Socket.io
 
-## Run the app locally
-
-1. [Install Node.js][]
-2. Download and extract the starter code from the Bluemix UI
-3. cd into the app directory
-4. Run `npm install` to install the app's dependencies
-5. Run `npm start` to start the app
-6. Access the running app in a browser at http://localhost:6001
-
-[Install Node.js]: https://nodejs.org/en/download/
+To be done(in 'needed for now' ascending order, roughly):
+    -[ ] clear the canvas
+    -[ ] Start game when n players are present. *n is 6 for now
+    -[ ] Randomly generate a word and display it
+    -[ ] Timer for game
+    -[ ] Check answer and set score.(when msg match to answer, ignore io.emit and set score)
+    -[ ] Visualize top 3
+    -[ ] Timeout for disconnect (so reload page won't affect and user is allowed to be disconnected for seconds)
+    -[ ] Use identicons-github to denerate icon based on user name
+    -[ ] Use redis to store chat messages & canvas
+    
