@@ -11,20 +11,27 @@
     <link rel="stylesheet" href="stylesheets/style.css">
     <!--script src="https://cdn.socket.io/socket.io-1.4.5.js"></script-->
 	<script src="/socket.io/socket.io.js"></script>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="script.js"></script>
+      <!--script src="http://code.jquery.com/jquery-1.11.1.js"></script-->
+         <!--script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script-->
   </head>
 
-  <body ondragstart="return false;" ondrop="return false;">
-    <h1 class="game_title"></h1>
+  <body>
     <div id="wrapper">
         <div id="draw" class="divs">
-          <div id="cursors"></div>
-          <canvas id="canv" width="800" height="600">Your browser does not support the canvas element.</canvas><p id="zobc"></p>
+            <div class="draw-header">
+                <!--div class="headeritem" id="roomid"><span class="seconds">99</span></div></div-->
+                <div class="headeritem" id="roomid">RM: 3201</div>
+                <div class="headeritem" id="hint">APPLE</div>
+                <div class="headeritem" id="clock">99</div>
+            </div>
+            <canvas id="canv" width="800" height="577">Your browser does not support the canvas element.</canvas>
+            <p id="zobc"></p>
+                       <!--div id="clock">
+                <div><span class="seconds"></span></div-->
             <!--onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()"-->
         </div>
         <div id="chat" class="divs">
-            <div class="chat-header">
+            <div class="chat-header"><div class="user-profile"><h2>Ready</h2></div><span>Nastu</span>
             </div>
             <div id="msgarea">
             </div>
@@ -33,7 +40,24 @@
             </form>
         </div>
     </div>
-    <div id="welcome"><h1>WELCOME!</h1><form class="form-name"><input id="input-name" autocomplete="off" type="text" placeholder="enter your name"/></form></div>
+    <div id="welcome">
+        <button id="btnCreate" class="left">CREATE</button>
+        <button id="btnJoin" class="right">JOIN</button>
+        <div class="form-room">
+            <input id="input-room" autocomplete="off" type="text" placeholder="Game ID:"/>
+        </div>
+        <div class="form-name">
+            <input id="input-name" autocomplete="off" type="text" placeholder="Your Name:"/>
+        </div>
+    </div>
+    <div id="rcdWrapper">
+        <div style="display: table-cell; vertical-align: middle;">
+            Game starts in<br><div id="rcd"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="script.js"></script>
   </body>
 
 </html>
