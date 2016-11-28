@@ -16,6 +16,11 @@ jQuery(function($){
             IO.socket.on('showReadyCountDown', App.showReadyCountDown);
             IO.socket.on('updateGameCountDown', App.updateGameCountDown);
             IO.socket.on('updateChat', App.updateChat);
+            IO.socket.on('updateInfo', App.updateInfo);
+            IO.socket.on('updateCanvas', Draw.updateCanvas);
+
+            IO.socket.on('updateReadyCountDown', App.updateReadyCountDown);
+            IO.socket.on('countDownFinish', App.onCountDownFinish);
             //IO.socket.on('beginNewGame', IO.beginNewGame );
             //IO.socket.on('newWordData', IO.onNewWordData);
             //IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
@@ -41,6 +46,7 @@ jQuery(function($){
         myName: '',
         mySocketId: '',
         answer: '',
+        answered: false,
         gameState: STATES.IDLE,
 
         players: {},
@@ -53,7 +59,6 @@ jQuery(function($){
         cacheElements: function () {
             App.$doc = $(document);
             //App.$readyCountDown = $('#rcd');
-
         },
 
         bindEvents: function () {
@@ -117,13 +122,18 @@ jQuery(function($){
                 var data = {
                     gameId: App.gameId,
                     playerId: App.mySocketId,
-                    message: $('#msg').val(),
+                    message: $('#msg').val()
                 };
                 if(App.gameState == STATES.PLAY) {
-                    if(data.message !== App.answer) {
-                        IO.socket.emit('submitChat', data);
-                    } else {
-                        // emit add score
+                    if(App.myRole === 'guesser') {
+                        if (data.message !== App.answer) {
+                            IO.socket.emit('submitChat', data);
+                        } else if (!App.answered) {
+                            // emit add score
+                            IO.socket.emit('updateScore', data);
+                            App.updateInfo('Ooops!');
+                            App.answered = true;
+                        }
                     }
                 } else {
                     IO.socket.emit('submitChat', data);
@@ -134,7 +144,7 @@ jQuery(function($){
         },
 
         updateChat: function (data) {
-            var div = $('#msgarea');
+            //var div = $('#msgarea');
             $('#msgarea').append($('<div class="chat-profile ' + data.playerId + '"></div>'))
                 .append($('<div class="bubble"><p><span>' + App.players[data.playerId] + ': </span>' +  data.message + '</p></div>'))
                 .scrollTop(div.prop("scrollHeight"));
@@ -153,7 +163,7 @@ jQuery(function($){
          *******************************/
         addIcon: function (data) {
             $('.chat-header').append($('<div class="user-profile ' + data.playerId + '"></div><span>' + data.playerName + '</span>'));
-            $('.' + data.playerId).css("background-image", "url('identicons/1.png')"); //later goal: customizable
+            $('.' + data.playerId).css("background-image", "url('identicons/1.png')");  //later goal: customizable
             App.players[data.playerId] = data.playerName;
             console.log('added icon for ' + data.playerName + ', id: ' + data.playerId);
         },
@@ -183,52 +193,53 @@ jQuery(function($){
          *                             *
          *******************************/
         showReadyCountDown: function (data) {
+            // Update state
             App.gameState = STATES.READY;
+
+            // Clear canvas
+            Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
+
+            // Show ready countdown
             $('#rcdWrapper').css('visibility', 'visible');
+
             // Assigning roles
             if(data == App.mySocketId) {
                 App.myRole = 'drawer';
             } else {
                 App.myRole = 'guesser';
             }
-            IO.socket.on('updateReadyCountDown', App[App.myRole].updateReadyCountDown);
-            IO.socket.on('countDownFinish', App[App.myRole].onCountDownFinish);
         },
 
-        drawer: {
-            /* *****************************
-             *             FOR             *
-             *            DRAWER           *
-             *******************************/
-            updateReadyCountDown: function (time) {
-                console.log(time);
+        /* *****************************
+         *                             *
+         *        GAME COUNTDOWN       *
+         *                             *
+         *******************************/
+        updateReadyCountDown: function (time) {
+            console.log(time);
+            if(App.myRole === 'drawer') {
                 $('#rcd').html(time + 'Draw turn!');
-            },
-            onCountDownFinish: function (data) {
-                App.gameState = STATES.READY;
-                $('#rcdWrapper').css('visibility', 'hidden');
-                $('#hint').html(data);
-                App.answer = data;
-                App.countDown(21, 'sendGameCountDown', function(){
-                    IO.socket.emit('gameCountDownFinish');
-                })
+            } else {
+                $('#rcd').html(time + 'Guess turn!');
             }
         },
 
-        guesser: {
-            /* *****************************
-             *             FOR             *
-             *            GUESSER          *
-             *******************************/
-            updateReadyCountDown: function (time) {
-                console.log(time);
-                $('#rcd').html(time + 'Guess turn!');
-            },
-            onCountDownFinish: function (data) {
-                App.gameState = STATES.READY;
-                $('#rcdWrapper').css('visibility', 'hidden');
+        onCountDownFinish: function (data) {
+            // Update variables
+            App.answered = false;
+            App.gameState = STATES.PLAY;
+            App.answer = data;
+
+            // Hide wrapper
+            $('#rcdWrapper').css('visibility', 'hidden');
+
+            if(App.myRole === 'drawer') {
+                $('#hint').html(data);
+                App.countDown(21, 'sendGameCountDown', function () {
+                    IO.socket.emit('gameCountDownFinish', {gameId: App.gameId});
+                })
+            } else {
                 $('#hint').html('???');
-                App.answer = data;
             }
         },
 
@@ -259,15 +270,105 @@ jQuery(function($){
                 }
             }
         }
+
+    };
+
+    var Draw = {
+        /* *****************************
+         *                             *
+         *       CANVAS FUNCTION       *
+         *                             *
+         *******************************/
+        pos: {
+            fx: 0, fy: 0, tx: 0, ty: 0, color: '#000'
+        },
+        drawing: false,
+        mov: false,
+        wasout: true,
+        //canvas: document.getElementById('canv'),
+        //ctx: Draw.canvas.getContext('2d'),
+        //canvas_parent: document.getElementById('draw'),
+
+        init: function () {
+            Draw.cacheElements();
+            Draw.bindEvents();
+        },
+
+        cacheElements: function () {
+            Draw.$canvas = $('#canv');
+            Draw.$canvas_parent = $('#draw');
+            Draw.$ctx = $('#canv')[0].getContext('2d');
+
+            var canvas = document.getElementById('canv');
+            var canvas_parent = document.getElementById('draw');
+            Draw.deltax = canvas.offsetLeft + canvas_parent.offsetLeft;
+            Draw.deltay = canvas.offsetTop + canvas_parent.offsetTop;
+
+            console.log('deltax: ' + Draw.deltax + ' ' + JSON.stringify(Draw.$canvas));
+            console.log('deltay: ' + Draw.deltay + ' ' + JSON.stringify(Draw.$canvas_parent));
+        },
+
+        bindEvents: function () {
+            Draw.$canvas.mousedown(function (e) {
+                e.preventDefault();
+                console.log('downed');
+                Draw.pos.fx = e.pageX - Draw.deltax;
+                Draw.pos.fy = e.pageY - Draw.deltay;
+                Draw.drawing = true;
+            });
+
+            Draw.$canvas.mouseup(function () {
+                Draw.drawing = false;
+            });
+
+            var prev = $.now();
+            Draw.$canvas.mousemove(function (e) {
+                console.log('moved');
+                if(App.myRole === 'drawer' || App.gameState !== STATES.PLAY) {
+                    if ($.now() - prev > 25) {
+                        Draw.pos.tx = e.pageX - Draw.deltax;
+                        Draw.pos.ty = e.pageY - Draw.deltay;
+                        if(Draw.drawing) {
+                            IO.socket.emit('draw', {gameId: App.gameId, pos: Draw.pos});
+                        }
+                        prev = $.now();
+                    }
+                    if(Draw.drawing) {
+                        Draw.pos.fx = Draw.pos.tx;
+                        Draw.pos.fy = Draw.pos.ty;
+                    }
+                    //Draw.wasout = false;
+                    //Draw.mov = true;
+                    document.getElementById("zobc").innerHTML = "Coordinates: (" + Draw.pos.tx + "," + Draw.pos.ty + ")";
+                    document.getElementById("canv").style.boxShadow = "0 5px 30px rgba(240, 128, 128, 0.7)";
+                }
+            });
+
+            Draw.$canvas.mouseout(function () {
+                Draw.drawing = false;
+                if(App.myRole === 'drawer'|| App.gameState !== STATES.PLAY) {
+                    document.getElementById("zobc").innerHTML = "";
+                    document.getElementById("canv").style.boxShadow = "0 5px 30px rgba(0, 0, 0, 0.3)";
+                }
+            });
+        },
+
+        updateCanvas: function(data) {
+            Draw.$ctx.beginPath();
+            Draw.$ctx.lineJoin="round";
+            Draw.$ctx.moveTo(data.fx, data.fy);
+            Draw.$ctx.lineTo(data.tx, data.ty);
+            //Draw.$ctx.quadraticCurveTo(data.tx, data.ty);
+            Draw.$ctx.lineWidth = 5;
+            Draw.$ctx.lineCap = 'round';
+            Draw.$ctx.stroke();
+        }
     };
     IO.init();
     App.init();
+    Draw.init();
 
-    /* *****************************
-     *                             *
-     *       CANVAS FUNCTION       *
-     *                             *
-     *******************************/
+
 
 
 }($));
@@ -326,5 +427,4 @@ jQuery(function($){
         setTimeout(mainloop, 1);
     }
     mainloop();
-    
-});
+    */

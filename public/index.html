@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
+<head>
     <title>Ooops</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,33 +10,38 @@
     <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
     <link rel="stylesheet" href="stylesheets/style.css">
     <!--script src="https://cdn.socket.io/socket.io-1.4.5.js"></script-->
-	<script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
       <!--script src="http://code.jquery.com/jquery-1.11.1.js"></script-->
          <!--script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js'></script-->
-  </head>
+</head>
 
-  <body>
+<body>
     <div id="wrapper">
-        <div id="draw" class="divs">
+        <div id="draw" class="divs" oncontextmenu="return false;">
             <div class="draw-header">
                 <!--div class="headeritem" id="roomid"><span class="seconds">99</span></div></div-->
                 <div class="headeritem" id="roomid">RM: 3201</div>
                 <div class="headeritem" id="hint">APPLE</div>
                 <div class="headeritem" id="clock">99</div>
             </div>
+            <div id="rcdWrapper">
+                <div style="display: table-cell; vertical-align: middle;">
+                    Game starts in<br><div id="rcd"></div>
+                </div>
+            </div>
             <canvas id="canv" width="800" height="577">Your browser does not support the canvas element.</canvas>
+
             <p id="zobc"></p>
                        <!--div id="clock">
                 <div><span class="seconds"></span></div-->
             <!--onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()"-->
         </div>
         <div id="chat" class="divs">
-            <div class="chat-header"><div class="user-profile"><h2>Ready</h2></div><span>Nastu</span>
-            </div>
+            <div class="chat-header"><!--div class="user-profile"><h2>Ready</h2></div><span>lol</span--></div>
             <div id="msgarea">
             </div>
             <form class="send" action="">
-              <input id="msg" autocomplete="off" type="text" placeholder="enter" />
+                <input id="msg" autocomplete="off" type="text" placeholder="enter" />
             </form>
         </div>
     </div>
@@ -50,14 +55,12 @@
             <input id="input-name" autocomplete="off" type="text" placeholder="Your Name:"/>
         </div>
     </div>
-    <div id="rcdWrapper">
+    <!--div id="rcdWrapper">
         <div style="display: table-cell; vertical-align: middle;">
             Game starts in<br><div id="rcd"></div>
         </div>
-    </div>
-
+    </div-->
     <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="script.js"></script>
-  </body>
-
+</body>
 </html>
