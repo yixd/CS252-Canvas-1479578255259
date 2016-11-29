@@ -11,12 +11,14 @@ jQuery(function($){
             IO.socket.on('newGameCreated', App.onNewGameCreated);
             IO.socket.on('loadIcon', App.addIcon);
             IO.socket.on('playerJoinedRoom', App.playerJoinedRoom);
+            IO.socket.on('playerDisconnect', App.playerDisconnect);
 
             IO.socket.on('updateIcon', App.updateIcon);
             IO.socket.on('showReadyCountDown', App.showReadyCountDown);
             IO.socket.on('updateGameCountDown', App.updateGameCountDown);
             IO.socket.on('updateChat', App.updateChat);
             IO.socket.on('updateInfo', App.updateInfo);
+            IO.socket.on('updateScoreBoard', App.updateScoreBoard);
             IO.socket.on('updateCanvas', Draw.updateCanvas);
 
             IO.socket.on('updateReadyCountDown', App.updateReadyCountDown);
@@ -45,7 +47,7 @@ jQuery(function($){
         myRole: '',
         myName: '',
         mySocketId: '',
-        answer: '',
+        aw: '',
         answered: false,
         gameState: STATES.IDLE,
 
@@ -100,16 +102,28 @@ jQuery(function($){
         //data {{playerName, gameId, mySocketId }}
         playerJoinedRoom: function (data) {
             if(data.playerId == App.mySocketId) {
-                //self joined room successfully
-                //fade out welcome window
+                // Self joined room successfully
+                // Fade out welcome window
                 $('#welcome').fadeOut();
-                //bind function for my icon
+                // Bind function for my icon
                 $('.chat-header').on('click', '.user-profile.' + App.mySocketId, App.onIconClick);
+                // Set room id and timer
+                $('#roomid').html(data.gameId.toString());
+                $('#clock').html('00');
             }
             //send notify message
             App.updateInfo('\'' + data.playerName + '\' joined game');
             //add icon to chat header
             App.addIcon(data);
+        },
+
+        playerDisconnect: function (playerId) {
+            // send info
+            App.updateInfo(App.players[playerId] + ' left game');
+            // remove from profile header
+            $('.user-profile.' + playerId).remove();
+            $('.user-profile-span-' + playerId).remove();
+            //App.removeIcon();
         },
 
         /* *****************************
@@ -126,7 +140,7 @@ jQuery(function($){
                 };
                 if(App.gameState == STATES.PLAY) {
                     if(App.myRole === 'guesser') {
-                        if (data.message !== App.answer) {
+                        if (data.message !== App.aw) {
                             IO.socket.emit('submitChat', data);
                         } else if (!App.answered) {
                             // emit add score
@@ -144,14 +158,14 @@ jQuery(function($){
         },
 
         updateChat: function (data) {
-            //var div = $('#msgarea');
+            var div = $('#msgarea'); // required
             $('#msgarea').append($('<div class="chat-profile ' + data.playerId + '"></div>'))
                 .append($('<div class="bubble"><p><span>' + App.players[data.playerId] + ': </span>' +  data.message + '</p></div>'))
                 .scrollTop(div.prop("scrollHeight"));
         },
 
         updateInfo: function (message) {
-            var div = $('#msgarea');
+            var div = $('#msgarea'); // required
             $('#msgarea').append($('<div class="bubble info"><p>' + message + '</p></div>'))
                 .scrollTop(div.prop("scrollHeight"));
         },
@@ -162,8 +176,9 @@ jQuery(function($){
          *                             *
          *******************************/
         addIcon: function (data) {
-            $('.chat-header').append($('<div class="user-profile ' + data.playerId + '"></div><span>' + data.playerName + '</span>'));
-            $('.' + data.playerId).css("background-image", "url('identicons/1.png')");  //later goal: customizable
+            $('.chat-header').append($('<div class="user-profile ' + data.playerId + '"></div><span class="user-profile-span-' + data.playerId + '">' + data.playerName + '</span>'));
+            //$('.' + data.playerId).css("background-image", "url('identicons/2.png')");  //later goal: customizable
+            $('html > body').append($("<style>." + data.playerId + " {background-image: url('identicons/2.png')}</style>"));
             App.players[data.playerId] = data.playerName;
             console.log('added icon for ' + data.playerName + ', id: ' + data.playerId);
         },
@@ -200,6 +215,7 @@ jQuery(function($){
             Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
 
             // Show ready countdown
+            $('#rcd').html('');
             $('#rcdWrapper').css('visibility', 'visible');
 
             // Assigning roles
@@ -210,6 +226,15 @@ jQuery(function($){
             }
         },
 
+        updateScoreBoard: function (data) {
+            App.gameState = STATES.ENDING;
+            $('#rcd').html('');
+            Object.keys(data).forEach(function (key){
+                $('#rcd').append(data[key]);
+            });
+            // Show ready countdown
+            $('#rcdWrapper').css('visibility', 'visible');
+        },
         /* *****************************
          *                             *
          *        GAME COUNTDOWN       *
@@ -218,9 +243,9 @@ jQuery(function($){
         updateReadyCountDown: function (time) {
             console.log(time);
             if(App.myRole === 'drawer') {
-                $('#rcd').html(time + 'Draw turn!');
+                $('#rcd').html('Draw!<br>' + time);
             } else {
-                $('#rcd').html(time + 'Guess turn!');
+                $('#rcd').html('Guess!<br>' + time);
             }
         },
 
@@ -228,7 +253,7 @@ jQuery(function($){
             // Update variables
             App.answered = false;
             App.gameState = STATES.PLAY;
-            App.answer = data;
+            App.aw = data;
 
             // Hide wrapper
             $('#rcdWrapper').css('visibility', 'hidden');
@@ -304,8 +329,8 @@ jQuery(function($){
             Draw.deltax = canvas.offsetLeft + canvas_parent.offsetLeft;
             Draw.deltay = canvas.offsetTop + canvas_parent.offsetTop;
 
-            console.log('deltax: ' + Draw.deltax + ' ' + JSON.stringify(Draw.$canvas));
-            console.log('deltay: ' + Draw.deltay + ' ' + JSON.stringify(Draw.$canvas_parent));
+            //console.log('deltax: ' + Draw.deltax + ' ' + JSON.stringify(Draw.$canvas));
+            //console.log('deltay: ' + Draw.deltay + ' ' + JSON.stringify(Draw.$canvas_parent));
         },
 
         bindEvents: function () {
@@ -368,63 +393,4 @@ jQuery(function($){
     App.init();
     Draw.init();
 
-
-
-
 }($));
-
-
-/*
-
-
-
-    var pos = {
-        fx: 0, fy: 0, tx: 0, ty: 0, color: '#000'
-    };
-    
-    var drawing = false, 
-        mov = false,
-        wasout = true;
-        canvas = document.getElementById('canv'),
-        ctx = canvas.getContext('2d'),
-        canvas_parent = document.getElementById('draw');
-    
-    socket.on('moving', function (data) {
-        if(name_entered == true){
-            ctx.beginPath();
-            ctx.moveTo(data.fx, data.fy);
-            ctx.lineTo(data.tx, data.ty);
-            ctx.stroke();
-        }
-    });
-    canvas.onmousedown = function (e) { drawing = true; };
-    canvas.onmouseup = function (e) { drawing = false; };
-    canvas.onmousemove = function (e) {
-        pos.tx = e.pageX - canvas.offsetLeft - canvas_parent.offsetLeft;
-        pos.ty = e.pageY - canvas.offsetTop - canvas_parent.offsetTop;
-        if(drawing && wasout) {
-            pos.fx = pos.tx;
-            pos.fy = pos.ty;
-            wasout = false;
-        }
-        mov = true;
-        document.getElementById("zobc").innerHTML="Coordinates: (" + pos.tx + "," + pos.ty + ")";
-        document.getElementById("canv").style.boxShadow="0 5px 30px rgba(240, 128, 128, 0.7)";
-    };
-    canvas.onmouseout = function (e) {
-        wasout = true;
-        document.getElementById("zobc").innerHTML="";
-        document.getElementById("canv").style.boxShadow="0 5px 30px rgba(0, 0, 0, 0.3)";
-    }
-
-    function mainloop() {
-        if(drawing && mov) {
-            socket.emit('mousemove', pos);
-            mov = false;
-        }
-        pos.fx = pos.tx;
-        pos.fy = pos.ty;
-        setTimeout(mainloop, 1);
-    }
-    mainloop();
-    */
