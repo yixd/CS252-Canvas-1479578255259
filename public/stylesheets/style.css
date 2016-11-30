@@ -108,6 +108,7 @@ a:hover {
     align-content: center;
     align-items: center;
     margin: 0 auto;
+    visibility: hidden;
 }
 #draw {
     margin: 100px auto;
@@ -160,7 +161,7 @@ a:hover {
     height: 50px;
     display: inline-block;
     position: relative;
-    border-radius: 100%;
+    border-radius: 40%;
     background: #DFDFEF;
     margin: 0 10px;
     background-size: cover;
@@ -169,33 +170,30 @@ a:hover {
       rgba(0, 0, 0, 0.6),
       rgba(0, 0, 0, 0.6)
     );*/
-    -webkit-filter: grayscale(0%);
-    filter: grayscale(0%);
     cursor: pointer;
 }
 
 .user-profile h2 {
     font-family: 'Roboto', sans-serif;
-    font-weight: 900;
-    color: black;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0px 0px 5px black, 0 0 5px black, 0 0 5px black;
     text-transform: uppercase;
     margin: 0;
     position: absolute;
     top: 50%;
     left: 50%;
-    font-size: 13px;
+    font-size: 16px;
     transform: translate(-50%, -50%);
     opacity: 1;
 }
 
 .user-profile.active {
-    -webkit-filter: grayscale(0%);
-    filter: grayscale(0%);
+
 }
 
 .user-profile.inactive {
-    -webkit-filter: grayscale(100%);
-    filter: grayscale(100%);
+    box-shadow: 0 5px 30px rgba(240, 128, 128, 0.7);
 }
 
 .chat-profile {
@@ -269,9 +267,10 @@ input {
     opacity: 1;
 }
 .bubble.info {
-    background-color: crimson;
+    background-color: #DFDFEF;
+    color: #414141;
     clear: both;
-    margin-left: 55px;
+    margin-left: 150px;
 }
 .bubble-alt {
     float: right;
@@ -340,6 +339,43 @@ input {
     line-height: 1.2857em;
     text-transform: none;
     visibility: hidden;
+}
+
+.score {
+    font-size: 35px;
+    line-height: 0.8em;
+}
+
+.saving {
+    font-size: 40px;
+}
+
+.saving span {
+    font-size: 50px;
+    animation-name: blink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+.saving span:nth-child(2) {
+    animation-delay: .2s;
+}
+
+.saving span:nth-child(3) {
+    animation-delay: .4s;
+}
+
+@keyframes blink {
+    0% {
+        opacity: .2;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: .2;
+    }
 }
 
 

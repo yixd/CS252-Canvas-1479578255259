@@ -18,7 +18,7 @@ jQuery(function($){
             IO.socket.on('updateGameCountDown', App.updateGameCountDown);
             IO.socket.on('updateChat', App.updateChat);
             IO.socket.on('updateInfo', App.updateInfo);
-            IO.socket.on('updateScoreBoard', App.updateScoreBoard);
+            IO.socket.on('updateScoreBoard', Draw.updateScoreBoard);
             IO.socket.on('updateCanvas', Draw.updateCanvas);
 
             IO.socket.on('updateReadyCountDown', App.updateReadyCountDown);
@@ -40,7 +40,6 @@ jQuery(function($){
         IDLE: 0,
         READY: 1,
         PLAY: 2,
-        ENDING: 3
     });
     var App = {
         gameId: 0,
@@ -105,6 +104,7 @@ jQuery(function($){
                 // Self joined room successfully
                 // Fade out welcome window
                 $('#welcome').fadeOut();
+                $('#wrapper').css('visibility', 'visible');
                 // Bind function for my icon
                 $('.chat-header').on('click', '.user-profile.' + App.mySocketId, App.onIconClick);
                 // Set room id and timer
@@ -112,14 +112,17 @@ jQuery(function($){
                 $('#clock').html('00');
             }
             //send notify message
-            App.updateInfo('\'' + data.playerName + '\' joined game');
+            App.updateInfo('-- \'' + data.playerName + '\' joined game --');
+            if(data.playerId == App.mySocketId) {
+                App.updateInfo('-- Press icon for ready --');
+            }
             //add icon to chat header
             App.addIcon(data);
         },
 
         playerDisconnect: function (playerId) {
             // send info
-            App.updateInfo(App.players[playerId] + ' left game');
+            App.updateInfo('-- \'' + App.players[playerId] + '\' left game --');
             // remove from profile header
             $('.user-profile.' + playerId).remove();
             $('.user-profile-span-' + playerId).remove();
@@ -177,10 +180,9 @@ jQuery(function($){
          *******************************/
         addIcon: function (data) {
             $('.chat-header').append($('<div class="user-profile ' + data.playerId + '"></div><span class="user-profile-span-' + data.playerId + '">' + data.playerName + '</span>'));
-            //$('.' + data.playerId).css("background-image", "url('identicons/2.png')");  //later goal: customizable
-            $('html > body').append($("<style>." + data.playerId + " {background-image: url('identicons/2.png')}</style>"));
+            $('html > body').append($("<style>." + data.playerId + " {background-image: url('https://s17.postimg.org/" + data.playerIcon + ".png')}</style>"));
             App.players[data.playerId] = data.playerName;
-            console.log('added icon for ' + data.playerName + ', id: ' + data.playerId);
+            console.log('added icon for ' + data.playerName + ', id: ' + data.playerId + ', icon: ' + data.playerIcon);
         },
 
         onIconClick: function () {
@@ -197,13 +199,10 @@ jQuery(function($){
             //stat 0: not ready, 1: ready
             var $who =  $('.user-profile.' + data.playerId);
             console.log('data: ' + JSON.stringify(data));
-            if(data.playerScore !== 'READY'){
-                $who.removeClass('hasready').removeClass('inactive').empty();
-                if(data.playerScore != undefined) {
-                    $who.append($('<h2>' + data.playerScore + '</h2>'));
-                }
-            }else{
-                $who.addClass('hasready').addClass('inactive').html('<h2>' + data.playerScore + '</h2>');
+            if(data.playerScore == undefined) {
+                $who.removeClass('inactive').empty();
+            } else {
+                $who.addClass('inactive').html('<h2>' + data.playerScore + '</h2>');
             }
         },
 
@@ -218,7 +217,8 @@ jQuery(function($){
 
             // Clear canvas
             Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
-
+            $('#hint').html('<p class="saving"><span>.</span><span>.</span><span>.</span></p>');
+            $('#clock').html('00');
             // Show ready countdown
             $('#rcd').html('');
             $('#rcdWrapper').css('visibility', 'visible');
@@ -231,15 +231,6 @@ jQuery(function($){
             }
         },
 
-        updateScoreBoard: function (data) {
-            App.gameState = STATES.ENDING;
-            $('#rcd').html('');
-            Object.keys(data).forEach(function (key){
-                $('#rcd').append(data[key]);
-            });
-            // Show ready countdown
-            $('#rcdWrapper').css('visibility', 'visible');
-        },
         /* *****************************
          *                             *
          *        GAME COUNTDOWN       *
@@ -265,7 +256,7 @@ jQuery(function($){
 
             if(App.myRole === 'drawer') {
                 $('#hint').html(data);
-                App.countDown(21, 'sendGameCountDown', function () {
+                App.countDown(60, 'sendGameCountDown', function () {
                     IO.socket.emit('gameCountDownFinish', {gameId: App.gameId});
                 })
             } else {
@@ -392,6 +383,29 @@ jQuery(function($){
             Draw.$ctx.lineWidth = 5;
             Draw.$ctx.lineCap = 'round';
             Draw.$ctx.stroke();
+        },
+
+        updateScoreBoard: function (data) {
+            App.gameState = STATES.IDLE;
+            Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
+            Draw.$ctx.font = "30px Courier New";
+            Draw.$ctx.textAlign = 'center';
+
+            var lh = 45; // line height
+            var n = Object.keys(data).length;
+            var os = (22 * n + lh * (n - 1)) / 3;
+            var i = 0;
+
+            var text = '';
+            for(var i in data) {
+                Draw.$ctx.fillText(i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore,
+                    Draw.$canvas.width()/2, Draw.$canvas.height()/2 + i * lh - os);
+                text += i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore + '<br>';
+                i++;
+            }
+            console.log(text);
+            App.updateInfo('Scoreboard: <br>' + text);
+
         }
     };
     IO.init();

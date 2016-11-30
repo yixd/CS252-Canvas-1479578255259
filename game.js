@@ -3,9 +3,10 @@ var STATES = Object.freeze({
     IDLE: 0,
     READY: 1,
     PLAY: 2,
-    ENDING: 3,
-    ERROR: 4
+    ERROR: 3
 });
+var NUM_OF_ROUNDS = 4;
+
 var word_easy = [
     "chair","milk","jacket","person","butterfly","ant","truck","light","pants","feet","mountain","flower","ice cream","ball","nose","book","lollipop","apple","banana","car","leaf","lips","cloud","star","circle","socks","Mickey Mouse","bee","ring","table","shirt","sunglasses","bed","grass","turtle","balloon","sun","moon","spoon","hat","lamp","ocean","ear","cherry", "pen", "drum", "orange", "jellyfish", "boat", "stairs", "lemon","candle", "ghost","girl", "dog", "pig", "tree", "legs", "clock", "computer", "hamburger", "computer", "rocket", "giraffe", "train", "pizza", "elephant"
 ];
@@ -48,10 +49,10 @@ exports.initGame = function(pio, socket, roomCache){
     socket.on('draw', draw);
     socket.on('disconnect', function () {
         console.log('--- Disconnect --- ' + socket.id + ' gameId: ' + socket.gameId);
+        //console.log(JSON.stringify(cache[socket.gameId]));
         var room = cache[socket.gameId];
         if(room != undefined) {
-            var isDrawer = (room.drawQueue[0] == socket.gameId);
-            console.log('--- Is Drawer --- ');
+            var isDrawer = (room.drawQueue[0] == socket.id);
             // Remove from playerQueue
             room.playerQueue = room.playerQueue.filter(function (obj) {
                 return obj.playerId != socket.id;
@@ -61,21 +62,21 @@ exports.initGame = function(pio, socket, roomCache){
             delete room.playerScore[socket.id];
 
             // Remove from playerReady
-            if (room.playerReady.indexOf(socket.playerId) > -1) {
+            if (room.playerReady.indexOf(socket.id) > -1) {
                 console.log('--- Removed from playerReady --- ');
-                room.playerReady.splice(room.playerReady.indexOf(socket.playerId), 1);
+                room.playerReady.splice(room.playerReady.indexOf(socket.id), 1);
             }
 
             // Remove from drawQueue
-            if (room.drawQueue.indexOf(socket.playerId) > -1) {
+            if (room.drawQueue.indexOf(socket.id) > -1) {
                 console.log('--- Removed from drawQueue --- ');
-                room.drawQueue.splice(room.drawQueue.indexOf(socket.playerId), 1);
+                room.drawQueue.splice(room.drawQueue.indexOf(socket.id), 1);
             }
-            // reverse shift drawQueue to cancel out later shift
-
+            // put back icon
+            room.iconList.push(socket.icon);
             io.sockets.in(this.gameId).emit('playerDisconnect', this.id);
 
-            // idle | ending | (play & guesser) -> no effect
+            // idle | (play & guesser) -> no effect
             // (ready | play) & drawer -> restart from ready, score remain
             if(isDrawer) {
                 //  unShift drawQueue to cancel out later shift
@@ -101,9 +102,12 @@ function hostCreateNewGame() {
     // Join the Room and wait for the players
     this.join(newGameID.toString());
     cache[newGameID] = {
-        playerQueue: [], // {{playerId, playerName}}   -- delete upon disconnect
+        playerQueue: [], // {{playerId, playerName, playerIcon}}   -- delete upon disconnect
+        iconList: ['pzqgqlvov/abra.png', '5446fczhr/bellsprout', 'cy4s0r7an/bullbasaur', 'xjjjsnovj/caterpie', '6a86e5nsf/charmander', '5lzbv7p2n/dratini',
+            'rz72i0q0f/eevee', 'lznws3ulr/jigglypuff', 'mqgmxvwz3/mankey', 'p92bykipb/meowth', 'g2k1badgv/mew', '9ddhv9s4v/pidgey', 'kr016h2nj/pikachu_2',
+            'hy6tmg2b3/psyduck', 'dqc1dp0vj/rattata', 't0bwkvwdr/snorlax', 'am1dgwk33/squirtle', '9xx4bpar3/venonat', '8k5hgebhr/weedle', 'ygz5t0f5b/zubat'],
         chatHistory: [],
-        playerScore: {}, // key: playerId, val: playerScore *undefined when unready -- delete upon disconnect
+        playerScore: {}, // key: playerId, val: playerScore -- delete upon disconnect
         playerGuessed: [],
         playerReady: [],  // -- delete upon disconnect
         drawQueue: ['start'], // playerId
@@ -118,42 +122,51 @@ function playerJoinGame(data) {
     console.log('Player ' + data.playerName + ' attempting to join game: ' + data.gameId );
 
     // Look up the room ID
-    var room = sock.adapter.rooms[data.gameId.toString()];
+    var room_struct = sock.adapter.rooms[data.gameId.toString()];
     //console.log('room: ' + JSON.stringify(room));
     // If the room exists...
-    if( room != undefined ){
+    if( room_struct != undefined ){
+        var room = cache[data.gameId];
         // If state is IDLE
         if(cache[data.gameId].gameState == STATES.IDLE) {
-            if(room.length < 6) {
+            if(room_struct.length < 6) {
                 // Attach the socket id to the data object.
                 data.playerId = sock.id;
                 // Attach the game id and name to the socket
                 sock.gameId = data.gameId;
                 sock.playerName = data.playerName;
+                sock.playerIcon = room.iconList.splice(Math.floor(Math.random() * room.iconList.length), 1);
+                console.log('icon: ' + sock.playerIcon);
+                data.playerIcon = sock.playerIcon;
+
                 // Join room
                 sock.join(data.gameId);
                 console.log('Player ' + data.playerName + ' is joining game: ' + data.gameId);
+
                 // Load icons of players already in the room
                 for (var i in cache[data.gameId].playerQueue) {
                     sock.emit('loadIcon', cache[data.gameId].playerQueue[i]);
                 }
-                // Load icon status of players already in the room
-                Object.keys(cache[data.gameId].playerScore).forEach(function (key) {
-                    console.log('updating icon for' + key + ' ' + cache[data.gameId].playerScore[key]);
+                // Load icon status of ready players
+                for (var i in cache[data.gameId].playerReady) {
+                    console.log('updating icon for' + cache[data.gameId].playerReady[i]);
                     sock.emit('updateIcon', {
-                        playerId: key,
-                        playerScore: cache[data.gameId].playerScore[key]
+                        playerId: cache[data.gameId].playerReady[i],
+                        playerScore: 'READY'
                     });
-                });
+                }
                 // Emit an event notifying the clients that the player has joined the room.
                 io.sockets.in(data.gameId).emit('playerJoinedRoom', data);
                 // Add to playerQueue
                 cache[data.gameId].playerQueue.push({
                     playerName: data.playerName,
-                    playerId: data.playerId
+                    playerId: data.playerId,
+                    playerIcon: sock.playerIcon
                 });
                 // Add to drawQueue
                 cache[data.gameId].drawQueue.push(data.playerId);
+                // Initialize player score
+                cache[data.gameId].playerScore[data.playerId] = 0;
             } else {
                 sock.emit('alertError', {message: 'The room is full.'});
                 // To be done: allow up to 10 players
@@ -174,28 +187,23 @@ function submitChat(data) {
 }
 
 function updateIcon(data) {
-    //{{ }}
-    /*
-    if (users_ready.indexOf(data) < 0) {
-        users_ready.push(data);
-    } else {
-        users_ready.splice(users_ready.indexOf(data), 1);
-    }*/
     var room = cache[data.gameId];
-    console.log('state: ' + room.gameState + ' ' + data.playerId + ' in room ' + data.gameId + ' clicked icon ' + room.playerScore[data.playerId]);
+    //console.log('state: ' + room.gameState + ' ' + data.playerId + ' in room ' + data.gameId + ' clicked icon ' + room.playerScore[data.playerId]);
     if(room.gameState == STATES.IDLE){
-        var tmp = room.playerScore[data.playerId];
-        if(tmp !== 'READY') {
-            tmp = 'READY';
-            room.playerReady.push(data.playerId);
-        }else{
+        if(room.playerReady.indexOf(data.playerId) > -1) {
             room.playerReady.splice(room.playerReady.indexOf(data.playerId), 1);
+            io.sockets.in(data.gameId).emit('updateIcon', {playerId: data.playerId, playerScore: undefined });
+        }else{
+            room.playerReady.push(data.playerId);
+            io.sockets.in(data.gameId).emit('updateIcon', {playerId: data.playerId, playerScore: 'READY' });
         }
-        room.playerScore[data.playerId] = tmp;
-        io.sockets.in(data.gameId).emit('updateIcon', {playerId: data.playerId, playerScore: tmp });
-
+        console.log(':: player Ready:  ' + room.playerReady);
+        console.log(':: cache  Ready:  ' + cache[data.gameId].playerReady);
         if(room.playerReady.length > 1 && room.playerReady.length == room.playerQueue.length) {
             // idle to ready
+            Object.keys(room.playerScore).forEach(function (key) {
+                io.sockets.in(data.gameId).emit('updateIcon', {playerId: key, playerScore: room.playerScore[key] });
+            });
             readyCountDown(data.gameId);
         }
     }
@@ -206,7 +214,7 @@ function updateScore(data) {
     var room = cache[data.gameId];
     room.playerGuessed.push(data.playerId); // Allows flexibility of score system change
     var delta = (60 / cache[data.gameId].playerGuessed.length);
-    cache[data.gameId].playerScore[data.playerId] += delta;
+    room.playerScore[data.playerId] += delta;
     this.emit('updateInfo', '+' + delta);
     io.sockets.in(data.gameId).emit('updateIcon', {playerId: data.playerId, playerScore: room.playerScore[data.playerId] });
 }
@@ -230,13 +238,25 @@ function gameCountDownFinish(data) {
     if(room) {
         // clear player guessed
         room.playerGuessed = [];
-
-        if (room.round <= 4) {
+        console.log(room.round);
+        if (room.round < NUM_OF_ROUNDS) {
             // play to ready
             readyCountDown(data.gameId);
         } else {
-            // play to ending
-            room.gameState = STATES.ENDING;
+            // PLAY TO IDLE **** PLAY TO IDLE **** PLAY TO IDLE **** PLAY TO IDLE **** PLAY TO IDLE ****
+            console.log('PLAY TO IDLE');
+            room.round = 0;
+            room.playerReady = [];
+            room.gameState = STATES.IDLE;
+
+            var tmp = [];
+            Object.keys(room.playerScore).forEach(function(key){
+                tmp.push({playerId: key, playerScore: room.playerScore[key]});
+            });
+            tmp.sort(function (a, b) {
+                return b.playerScore - a.playerScore
+            });
+            io.sockets.in(data.gameId).emit('updateScoreBoard', tmp);
             // To be finished
         }
     }
@@ -244,6 +264,7 @@ function gameCountDownFinish(data) {
 
 function readyCountDown(gameId) {
     // all about ready state
+    console.log('in ready count down');
     var room = cache[gameId];
     room.gameState = STATES.READY;
     shiftDrawQueue(room);
@@ -262,6 +283,7 @@ function countDown(gameId, sec, callback) {
     function ticTac() {
         sec--;
         if(cache[gameId].gameState == STATES.ERROR) {
+            console.log('in countDown error');
             clearInterval(timeInterval);
             cache[gameId].gameState == STATES.READY;
             readyCountDown(gameId);
@@ -280,104 +302,3 @@ function countDown(gameId, sec, callback) {
 function draw(data) {
     io.sockets.in(data.gameId).emit('updateCanvas', data.pos);
 }
-
-
-
-
-//unfinished
-/*
-console.log(socket.id + ' connected');
-//var address = socket.handshake.address;
-//console.log('New connection from ' + address.address + ':' + address.port);
-socket.on('name-input', function (name) {
-    //
-     Object.keys(users).forEach(function (key) {
-     socket.emit('addIcon', users[key]);
-     })
-     for (var i in history_draw) {
-     socket.emit('moving', history_draw[i]);
-     }
-     for (var i in history_chat) {
-     socket.emit('chat', history_chat[i]);
-     }
-     users[socket.id] = {
-     'name': name,
-     'id': Object.keys(users).length + 1
-     };
-     socket.emit('setId', users[socket.id].id);
-     io.emit('info', '\'' + users[socket.id].name + '\' just entered room');
-     io.emit('addIcon', users[socket.id]);
-     //
-
-    //load history
-    for(var i in playerQueue) {
-        socket.emit('addIcon', playerQueue[i]);
-    }
-    for (var i in history_draw) {
-        socket.emit('moving', history_draw[i]);
-    }
-    for (var i in history_chat) {
-        socket.emit('chat', history_chat[i]);
-    }
-    if(icons.length > 0){
-        //room not full, add new player
-        var tmp = {"id": socket.id, "name": name, "icon": icons.pop()};
-        playerQueue.push(tmp);
-        socket.emit('setId', socket.id);
-        io.emit('info', '\'' + name + '\' joined game');
-        io.emit('addIcon', tmp);
-    } else{
-        //room full, start spectating
-        io.emit('info', '\'' + name + '\' started spectating');
-    }
-});
-
-socket.on('disconnect', function () {
-    //页面刷新的timeout - 还没做
-    if (users[socket.id]) {
-        io.emit('info', '\'' + users[socket.id].name + '\' left room');
-    }
-});
-socket.on('chat', function (msg) {
-    console.log('message:' + msg);
-    var temp = {
-        'msg': '<span>' + users[socket.id].name + ': </span>' + msg,
-        'id': users[socket.id].id
-    };
-    history_chat.push(temp);
-    io.emit('chat', temp);
-});
-
-socket.on('clickIcon', function (data) {
-    if (users_ready.indexOf(data) < 0) {
-        users_ready.push(data);
-    } else {
-        users_ready.splice(users_ready.indexOf(data), 1);
-    }
-    console.log('ready: ' + users_ready.length);
-    io.emit('toggleReady', data);
-
-});
-
-socket.on('mousemove', function (data) {
-    history_draw.push(data);
-    //socket.broadcast.emit('moving', data); //
-    io.emit('moving', data);
-});
-
-
-
-/* 清空画布 - 还没做
- socket.on('clearcanvas', function(){
- history_draw = [];
- io.emit('clearcanvas');
- });*/
-
-/*
- function mainloop() {
- if(!countdown_finished && users_ready.length > 0 && users_ready.length == Object.keys(users).length) {
- countdown(5);
- }
- setTimeout(mainloop, 1);
- }
- mainloop();*/
