@@ -184,21 +184,26 @@ jQuery(function($){
         },
 
         onIconClick: function () {
-            var data = {
-                gameId: App.gameId,
-                playerId: App.mySocketId
-            };
-            IO.socket.emit('iconClick', data);
+            if(App.gameState == STATES.IDLE) {
+                var data = {
+                    gameId: App.gameId,
+                    playerId: App.mySocketId
+                };
+                IO.socket.emit('iconClick', data);
+            }
         },
 
         updateIcon: function (data) {
             //stat 0: not ready, 1: ready
             var $who =  $('.user-profile.' + data.playerId);
             console.log('data: ' + JSON.stringify(data));
-            if(data.playerScore == undefined){
+            if(data.playerScore !== 'READY'){
                 $who.removeClass('hasready').removeClass('inactive').empty();
+                if(data.playerScore != undefined) {
+                    $who.append($('<h2>' + data.playerScore + '</h2>'));
+                }
             }else{
-                $who.addClass('hasready').addClass('inactive').empty().append($('<h2>' + data.playerScore + '</h2>'));
+                $who.addClass('hasready').addClass('inactive').html('<h2>' + data.playerScore + '</h2>');
             }
         },
 
@@ -264,7 +269,7 @@ jQuery(function($){
                     IO.socket.emit('gameCountDownFinish', {gameId: App.gameId});
                 })
             } else {
-                $('#hint').html('???');
+                $('#hint').html(data.replace(/[a-zA-Z0-9]/g, '_'));
             }
         },
 

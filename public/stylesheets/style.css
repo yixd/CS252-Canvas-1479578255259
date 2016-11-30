@@ -299,11 +299,15 @@ input {
 }
 
 #clock {
-    margin-right: auto;
+    margin-right: -30px;
+    width: 20%;
+    text-align: center;
 }
 
 #roomid {
-    margin-left: auto;
+    margin-left: -30px;
+    width: 20%;
+    text-align: center;
 }
 
 #hint {

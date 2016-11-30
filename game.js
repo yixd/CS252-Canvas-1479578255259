@@ -6,7 +6,23 @@ var STATES = Object.freeze({
     ENDING: 3,
     ERROR: 4
 });
+var word_easy = [
+    "chair","milk","jacket","person","butterfly","ant","truck","light","pants","feet","mountain","flower","ice cream","ball","nose","book","lollipop","apple","banana","car","leaf","lips","cloud","star","circle","socks","Mickey Mouse","bee","ring","table","shirt","sunglasses","bed","grass","turtle","balloon","sun","moon","spoon","hat","lamp","ocean","ear","cherry", "pen", "drum", "orange", "jellyfish", "boat", "stairs", "lemon","candle", "ghost","girl", "dog", "pig", "tree", "legs", "clock", "computer", "hamburger", "computer", "rocket", "giraffe", "train", "pizza", "elephant"
+];
 
+var word_medium = [
+    "belt", "corndog", "stove", "campfire", "lake", "coal", "gift", "mitten", "purse", "snowflake", "fur", "dog leash", "forest", "hair", "wood", "rain", "coconut", "knot", "bowtie", "telephone", "dragonfly", "waist", "cheeseburger", "food", "aircraft", "silverware", "knee", "battery", "strawberry", "lid", "manatee", "elbow", "basket", "unicorn", "trumpet", "ladder", "beach", "mushroom", "money", "batteries", "stingray", "penguin", "spool", "queen", "glove", "shallow", "rug", "cockroach", "pencil", "flamingo", "video camera", "mailbox", "nut", "hug", "toast", "pineapple", "harp", "sheep", "paw", "scar", "city", "thief", "photograph", "paper", "hip", "room", "washing machine", "fishing pole", "airport", "paint", "spine", "log", "hospital", "spaceship", "cage", "wing", "refrigerator", "tank", "violin", "broccoli", "heel", "eel", "nature", "blue jeans", "mattress", "whisk", "roller blading", "t-shirt", "maze", "net", "beaver", "cheetah", "base", "towel", "tennis", "plate", "sailboat", "pirate",
+];
+
+var word_hard = [
+    "wax", "grandpa", "half", "mime", "ivy", "shrew", "runt", "baguette", "rind", "bobsled", "shower curtain", "jungle", "CD", "bonnet", "boa constrictor", "ditch", "wooly mammoth", "Heinz 57", "dryer sheets", "germ", "bedbug", "macho", "letter opener", "fireman pole", "sushi", "fireside", "hot tub", "hurdle", "hydrogen", "myth", "welder", "dashboard", "orbit", "rubber", "bookend", "cabin", "darkness", "vegetarian", "wobble", "sneeze", "lie", "traffic jam", "password", "swamp", "lung", "deep", "drip", "ping pong", "yolk", "fog", "dripping", "comfy", "beanstalk", "newsletter", "professor", "cape", "plow", "foil", "post office", "tiptoe", "taxi", "chef", "crust", "coach", "fizz", "commercial", "ceiling fan", "dream", "sweater vest", "neighborhood", "diagonal", "nightmare", "bald", "double", "important", "pigpen", "dizzy", "extension cord", "fiddle", "vitamin", "wag", "sandbox", "baseboards", "wedding cake", "Internet", "salmon", "catalog", "zipper", "bride", "pilot", "quicksand", "zoo", "migrate", "picnic", "koala", "ski goggles", "cell phone charger", "mirror", "think", "knight"
+];
+
+var words = [
+    "wax", "grandpa", "half", "mime", "ivy", "shrew", "runt", "baguette", "rind", "bobsled", "shower curtain", "jungle", "CD", "bonnet", "boa constrictor", "ditch", "wooly mammoth", "Heinz 57", "dryer sheets", "germ", "bedbug", "macho", "letter opener", "fireman pole", "sushi", "fireside", "hot tub", "hurdle", "hydrogen", "myth", "welder", "dashboard", "orbit", "rubber", "bookend", "cabin", "darkness", "vegetarian", "wobble", "sneeze", "lie", "traffic jam", "password", "swamp", "lung", "deep", "drip", "ping pong", "yolk", "fog", "dripping", "comfy", "beanstalk", "newsletter", "professor", "cape", "plow", "foil", "post office", "tiptoe", "taxi", "chef", "crust", "coach", "fizz", "commercial", "ceiling fan", "dream", "sweater vest", "neighborhood", "diagonal", "nightmare", "bald", "double", "important", "pigpen", "dizzy", "extension cord", "fiddle", "vitamin", "wag", "sandbox", "baseboards", "wedding cake", "Internet", "salmon", "catalog", "zipper", "bride", "pilot", "quicksand", "zoo", "migrate", "picnic", "koala", "ski goggles", "cell phone charger", "mirror", "think", "knight",
+    "chair","milk","jacket","person","butterfly","ant","truck","light","pants","feet","mountain","flower","ice cream","ball","nose","book","lollipop","apple","banana","car","leaf","lips","cloud","star","circle","socks","Mickey Mouse","bee","ring","table","shirt","sunglasses","bed","grass","turtle","balloon","sun","moon","spoon","hat","lamp","ocean","ear","cherry", "pen", "drum", "orange", "jellyfish", "boat", "stairs", "lemon","candle", "ghost","girl", "dog", "pig", "tree", "legs", "clock", "computer", "hamburger", "computer", "rocket", "giraffe", "train", "pizza", "elephant",
+    "belt", "corndog", "stove", "campfire", "lake", "coal", "gift", "mitten", "purse", "snowflake", "fur", "dog leash", "forest", "hair", "wood", "rain", "coconut", "knot", "bowtie", "telephone", "dragonfly", "waist", "cheeseburger", "food", "aircraft", "silverware", "knee", "battery", "strawberry", "lid", "manatee", "elbow", "basket", "unicorn", "trumpet", "ladder", "beach", "mushroom", "money", "batteries", "stingray", "penguin", "spool", "queen", "glove", "shallow", "rug", "cockroach", "pencil", "flamingo", "video camera", "mailbox", "nut", "hug", "toast", "pineapple", "harp", "sheep", "paw", "scar", "city", "thief", "photograph", "paper", "hip", "room", "washing machine", "fishing pole", "airport", "paint", "spine", "log", "hospital", "spaceship", "cage", "wing", "refrigerator", "tank", "violin", "broccoli", "heel", "eel", "nature", "blue jeans", "mattress", "whisk", "roller blading", "t-shirt", "maze", "net", "beaver", "cheetah", "base", "towel", "tennis", "plate", "sailboat", "pirate",
+];
 
 /*
 var icons = {'identicons/1.png', 'identicons/2.png', 'identicons/3.png', 'identicons/4.png', 'identicons/5.png', 'identicons/6.png'};
@@ -76,7 +92,6 @@ exports.initGame = function(pio, socket, roomCache){
             }
         }
     });
-
 };
 
 function hostCreateNewGame() {
@@ -167,10 +182,10 @@ function updateIcon(data) {
         users_ready.splice(users_ready.indexOf(data), 1);
     }*/
     var room = cache[data.gameId];
-    console.log(data.playerId + ' in room ' + data.gameId + ' clicked icon ' + room.playerScore[data.playerId]);
+    console.log('state: ' + room.gameState + ' ' + data.playerId + ' in room ' + data.gameId + ' clicked icon ' + room.playerScore[data.playerId]);
     if(room.gameState == STATES.IDLE){
-        var tmp = undefined;
-        if(room.playerScore[data.playerId] == undefined) {
+        var tmp = room.playerScore[data.playerId];
+        if(tmp !== 'READY') {
             tmp = 'READY';
             room.playerReady.push(data.playerId);
         }else{
@@ -184,13 +199,16 @@ function updateIcon(data) {
             readyCountDown(data.gameId);
         }
     }
+
 }
 
 function updateScore(data) {
-    cache[data.gameId].playerGuessed.push(data.playerId); // Allows flexibility of score system change
+    var room = cache[data.gameId];
+    room.playerGuessed.push(data.playerId); // Allows flexibility of score system change
     var delta = (60 / cache[data.gameId].playerGuessed.length);
     cache[data.gameId].playerScore[data.playerId] += delta;
     this.emit('updateInfo', '+' + delta);
+    io.sockets.in(data.gameId).emit('updateIcon', {playerId: data.playerId, playerScore: room.playerScore[data.playerId] });
 }
 
 function sendGameCountDown(data) {
@@ -209,16 +227,18 @@ function shiftDrawQueue(room) {
 
 function gameCountDownFinish(data) {
     var room = cache[data.gameId];
-    // clear player guessed
-    room.playerGuessed = [];
+    if(room) {
+        // clear player guessed
+        room.playerGuessed = [];
 
-    if(room.round <= 4) {
-        // play to ready
-        readyCountDown(data.gameId);
-    } else {
-        // play to ending
-        room.gameState = STATES.ENDING;
-        // To be finished
+        if (room.round <= 4) {
+            // play to ready
+            readyCountDown(data.gameId);
+        } else {
+            // play to ending
+            room.gameState = STATES.ENDING;
+            // To be finished
+        }
     }
 }
 
@@ -233,7 +253,7 @@ function readyCountDown(gameId) {
     countDown(gameId, 6,function () {
         console.log('in count down call back');
         room.gameState = STATES.PLAY;
-        io.sockets.in(gameId).emit('countDownFinish', 'apple');
+        io.sockets.in(gameId).emit('countDownFinish', words[Math.floor(Math.random() * words.length)]);
     });
 }
 
@@ -260,6 +280,7 @@ function countDown(gameId, sec, callback) {
 function draw(data) {
     io.sockets.in(data.gameId).emit('updateCanvas', data.pos);
 }
+
 
 
 
@@ -343,18 +364,6 @@ socket.on('mousemove', function (data) {
     //socket.broadcast.emit('moving', data); //
     io.emit('moving', data);
 });
-
-var word easy = [
-"chair","milk","jacket","person","butterfly","ant","truck","light","pants","feet","mountain","flower","ice cream","ball","nose","book","lollipop","apple","banana","car","leaf","lips","cloud","star","circle","socks","Mickey Mouse","bee","ring","table","shirt","sunglasses","bed","grass","turtle","balloon","sun","moon","spoon","hat","lamp","ocean","ear","cherry", "pen”, "drum", "orange", "jellyfish", "boat", "stairs", "lemon","candle", "ghost","girl", "dog”, “pig”, “tree”, ”legs”, "clock", “computer”, “hamburger”,”computer”, “rocket”, “giraffe”, “train”, “pizza”, “elephant”…
-];
-
-var word medium = [
-"belt", "corndog", "stove", "campfire", "lake", "coal", "gift", "mitten", "purse", "snowflake", "fur", "dog leash", "forest", "hair", "wood", "rain", "coconut", "knot", "bowtie", "telephone", "dragonfly", "waist", "cheeseburger", "food", "aircraft", "silverware", "knee", "battery", "strawberry", "lid", "manatee", "elbow", "basket", "unicorn", "trumpet", "ladder", "beach", "mushroom", "money", "batteries", "stingray", "penguin", "spool", "queen", "glove", "shallow", "rug", "cockroach", "pencil", "flamingo", "video camera", "mailbox", "nut", "hug", "toast", "pineapple", "harp", "sheep", "paw", "scar", "city", "thief", "photograph", "paper", "hip", "room", "washing machine", "fishing pole", "airport", "paint", "spine", "log", "hospital", "spaceship", "cage", "wing", "refrigerator", "tank", "violin", "broccoli", "heel", "eel", "nature", "blue jeans", "mattress", "whisk", "roller blading", "t-shirt", "maze", "net", "beaver", "cheetah", "base", "towel", "tennis", "plate", "sailboat", "pirate"…
-];
-
-var word hard = [
-“wax", "grandpa", "half", "mime", "ivy", "shrew", "runt", "baguette", "rind", "bobsled", "shower curtain", "jungle", "CD", "bonnet", "boa constrictor", "ditch", "wooly mammoth", "Heinz 57", "dryer sheets", "germ", "bedbug", "macho", "letter opener", "fireman pole", "sushi", "fireside", "hot tub", "hurdle", "hydrogen", "myth", "welder", "dashboard", "orbit", "rubber", "bookend", "cabin", "darkness", "vegetarian", "wobble", "sneeze", "lie", "traffic jam", "password", "swamp", "lung", "deep", "drip", "ping pong", "yolk", "fog", "dripping", "comfy", "beanstalk", "newsletter", "professor", "cape", "plow", "foil", "post office", "tiptoe", "taxi", "chef", "crust", "coach", "fizz", "commercial", "ceiling fan", "dream", "sweater vest", "neighborhood", "diagonal", "nightmare", "bald", "double", "important", "pigpen", "dizzy", "extension cord", "fiddle", "vitamin", "wag", "sandbox", "baseboards", "wedding cake", "Internet", "salmon", "catalog", "zipper", "bride", "pilot", "quicksand", "zoo", "migrate", "picnic", "koala", "ski goggles", "cell phone charger", "mirror", "think", "knight"…
-];
 
 
 
