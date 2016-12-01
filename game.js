@@ -282,7 +282,7 @@ function readyCountDown(gameId) {
 function countDown(gameId, sec, callback) {
     var timeInterval = setInterval(ticTac, 1000);
     //(new Audio()).canPlayType("audio/ogg; codecs=vorbis");
-    var snd = new Audio ("countdown_beep.mp3");
+    //var snd = new Audio ("countdown_beep.mp3");
     function ticTac() {
         sec--;
         if(cache[gameId].gameState == STATES.ERROR) {
