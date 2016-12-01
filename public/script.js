@@ -457,14 +457,12 @@ jQuery(function($){
             var lh = 45; // line height
             var n = Object.keys(data).length;
             var os = (22 * n + lh * (n - 1)) / 3;
-            var i = 1;
 
             var text = '';
-            for(var i in data) {
+            for(var i = 0; i < data.length; i++) {
                 Draw.$ctx.fillText(i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore,
                     Draw.$canvas.width()/2, Draw.$canvas.height()/2 + i * lh - os);
-                text += i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore + '<br>';
-                i++;
+                text += (i + 1) + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore + '<br>';
             }
             //console.log(text);
             App.updateInfo('Scoreboard: <br>' + text);
