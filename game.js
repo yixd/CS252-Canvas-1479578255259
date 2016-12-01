@@ -298,7 +298,7 @@ function countDown(gameId, sec, callback) {
             snd.play();
         }
         else if (sec <= 0) {
-            snd.currentTime = 0;
+            //snd.currentTime = 0;
             clearInterval(timeInterval);
             callback();
             return;
