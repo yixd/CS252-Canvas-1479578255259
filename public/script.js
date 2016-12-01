@@ -47,7 +47,7 @@ jQuery(function($){
         myRole: '',
         myName: '',
         mySocketId: '',
-        aw: '',
+        aw: undefined,
         answered: false,
         gameState: STATES.IDLE,
 
@@ -61,6 +61,10 @@ jQuery(function($){
         cacheElements: function () {
             App.$doc = $(document);
             //App.$readyCountDown = $('#rcd');
+            App.sound = document.createElement('audio');
+            App.sound.src='reaper_countdown.mp3';
+            App.sound.volume = 0.50;
+            App.sound.preload = true;
         },
 
         bindEvents: function () {
@@ -147,7 +151,7 @@ jQuery(function($){
                 };
                 if(App.gameState == STATES.PLAY) {
                     if(App.myRole === 'guesser') {
-                        if (data.message !== App.aw) {
+                        if (data.message.toLowerCase() !== App.aw.toLowerCase()) {
                             IO.socket.emit('submitChat', data);
                         } else if (!App.answered) {
                             // emit add score
@@ -226,8 +230,9 @@ jQuery(function($){
             // Show ready countdown
             $('#rcd').html('');
             $('#rcdWrapper').css('visibility', 'visible');
-
-            App.updateInfo('-- Answer: ' + App.aw + ' --');
+            if(App.aw) {
+                App.updateInfo('-- Answer: ' + App.aw + ' --');
+            }
             // Assigning roles
             if(data == App.mySocketId) {
                 App.myRole = 'drawer';
@@ -236,11 +241,6 @@ jQuery(function($){
             }
         },
 
-        /* *****************************
-         *                             *
-         *        GAME COUNTDOWN       *
-         *                             *
-         *******************************/
         updateReadyCountDown: function (time) {
             //console.log(time);
             if(App.myRole === 'drawer') {
@@ -250,6 +250,11 @@ jQuery(function($){
             }
         },
 
+        /* *****************************
+         *                             *
+         *        GAME COUNTDOWN       *
+         *                             *
+         *******************************/
         onCountDownFinish: function (data) {
             // Update variables
             App.answered = false;
@@ -270,20 +275,13 @@ jQuery(function($){
             }
         },
 
-        /* *****************************
-         *                             *
-         *       DRAW HEADER FUNC      *
-         *                             *
-         *******************************/
         updateGameCountDown: function (t) {
+            if(t == '05') {
+                App.sound.play();
+            }
             $('#clock').html(t);
         },
 
-        /* *****************************
-         *                             *
-         *       HELPER FUNCTION       *
-         *                             *
-         *******************************/
         countDown: function(sec, listenerName, callback) {
             var timeInterval = setInterval(ticTac, 1000);
             function ticTac() {
@@ -450,6 +448,7 @@ jQuery(function($){
 
         updateScoreBoard: function (data) {
             App.gameState = STATES.IDLE;
+            App.aw = undefined;
             Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
             Draw.$ctx.font = "30px Courier New";
             Draw.$ctx.textAlign = 'center';
@@ -460,7 +459,7 @@ jQuery(function($){
 
             var text = '';
             for(var i = 0; i < data.length; i++) {
-                Draw.$ctx.fillText(i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore,
+                Draw.$ctx.fillText((i + 1) + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore,
                     Draw.$canvas.width()/2, Draw.$canvas.height()/2 + i * lh - os);
                 text += (i + 1) + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore + '<br>';
             }
