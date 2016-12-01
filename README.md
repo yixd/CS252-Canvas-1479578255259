@@ -1,7 +1,7 @@
 #CS 252 README
 ##Project Name: Pictionaries
-###Description: This is a simple game of pictionary that allows multiple players at the same time.
-###Technology: NodeJS, Bootstrap, HTML5, JavaScript, CSS, Socket.io
+###Description: This is a game of pictionary that allows multiple players and multiple rooms at the same time.
+###Technology: NodeJS, HTML5, JavaScript, CSS, Socket.io, MongoDB
 ##Authors:
 - [Minghao Guo](https://github.com/minaaa1003)
 - [Yixuan Ding](https://github.com/yixd)
