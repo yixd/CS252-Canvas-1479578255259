@@ -8,6 +8,7 @@
   "dependencies": {
     "cfenv": "1.0.x",
     "express": "4.13.x",
+    "redis": "^2.6.3",
     "socket.io": "^1.4.5"
   },
   "repository": {},

@@ -76,7 +76,10 @@ jQuery(function($){
          *       JOIN FUNCTIONS        *
          *                             *
          *******************************/
-        onCreateClick: function () { IO.socket.emit('hostCreateNewGame'); },
+        onCreateClick: function () {
+            IO.socket.emit('hostCreateNewGame');
+            $('#btnCreate').css('color', 'rgba(255, 255, 255, 0.3)');
+        },
 
         onNewGameCreated: function (data) {
             App.gameId = data.gameId;
@@ -183,7 +186,7 @@ jQuery(function($){
             $('.chat-header').append($('<div class="user-profile ' + data.playerId + '"></div><span class="user-profile-span-' + data.playerId + '">' + data.playerName + '</span>'));
             $('html > body').append($("<style>." + data.playerId + " {background-image: url('https://s17.postimg.org/" + data.playerIcon + ".png')}</style>"));
             App.players[data.playerId] = data.playerName;
-            console.log('added icon for ' + data.playerName + ', id: ' + data.playerId + ', icon: ' + data.playerIcon);
+            //console.log('added icon for ' + data.playerName + ', id: ' + data.playerId + ', icon: ' + data.playerIcon);
         },
 
         onIconClick: function () {
@@ -199,7 +202,7 @@ jQuery(function($){
         updateIcon: function (data) {
             //stat 0: not ready, 1: ready
             var $who =  $('.user-profile.' + data.playerId);
-            console.log('data: ' + JSON.stringify(data));
+            //console.log('data: ' + JSON.stringify(data));
             if(data.playerScore == undefined) {
                 $who.removeClass('inactive').empty();
             } else {
@@ -224,6 +227,7 @@ jQuery(function($){
             $('#rcd').html('');
             $('#rcdWrapper').css('visibility', 'visible');
 
+            App.updateInfo('-- Answer: ' + App.aw + ' --');
             // Assigning roles
             if(data == App.mySocketId) {
                 App.myRole = 'drawer';
@@ -238,7 +242,7 @@ jQuery(function($){
          *                             *
          *******************************/
         updateReadyCountDown: function (time) {
-            console.log(time);
+            //console.log(time);
             if(App.myRole === 'drawer') {
                 $('#rcd').html('Draw!<br>' + time);
             } else {
@@ -462,7 +466,7 @@ jQuery(function($){
                 text += i + ' ' + App.players[data[i].playerId] + ' : ' + data[i].playerScore + '<br>';
                 i++;
             }
-            console.log(text);
+            //console.log(text);
             App.updateInfo('Scoreboard: <br>' + text);
 
         }
