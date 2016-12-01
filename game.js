@@ -295,6 +295,7 @@ function countDown(gameId, sec, callback) {
         io.sockets.in(gameId).emit('updateReadyCountDown', ('0' + sec).slice(-2));
         //console.log('t: ' + ('0' + sec).slice(-2));
         if (sec == 10) {
+            var snd = new Audio ("countdown_beep.mp3");
             snd.play();
         }
         if (sec <= 0) {
