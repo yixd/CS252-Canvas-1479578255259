@@ -98,17 +98,12 @@ body {
 .right {
     float: right;
 }
-
-a:hover {
-    text-decoration: underline;
-}
-
 #wrapper {
-    width: 1320px;
+    width: 1350px;
     align-content: center;
     align-items: center;
     margin: 0 auto;
-    visibility: hidden;
+    //visibility: hidden;
 }
 #draw {
     margin: 100px auto;
@@ -183,7 +178,7 @@ a:hover {
     position: absolute;
     top: 50%;
     left: 50%;
-    font-size: 16px;
+    font-size: 20px;
     transform: translate(-50%, -50%);
     opacity: 1;
 }
@@ -267,7 +262,7 @@ input {
     opacity: 1;
 }
 .bubble.info {
-    background-color: #DFDFEF;
+    background-color: salmon;
     color: #414141;
     clear: both;
     margin-left: 150px;
@@ -378,7 +373,47 @@ input {
     }
 }
 
+.tool-bar {
+    margin: 173px auto;
+    width: 50px;
+    text-align: center;
+    background-color: #1E2C3D;
+}
 
+.tool-bar a{
+    padding: 15px;
+    display: block;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 20px;
+}
+.tool-bar input{
+    padding: 4px 10px 4px 10px;
+    height: 40px;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+
+.tool-bar a:hover {
+    background-color: #95c2fd;
+}
+
+#large {
+    font-size: 20px;
+}
+
+#medium {
+    font-size: 15px
+}
+
+#small {
+    font-size: 10px;
+}
+
+.active {
+    background-color: #95c2fd;
+}
 
 
 

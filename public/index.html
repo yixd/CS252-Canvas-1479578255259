@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="stylesheets/normalize.css">
     <link rel='stylesheet prefetch' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
     <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!--script src="https://cdn.socket.io/socket.io-1.4.5.js"></script-->
     <script src="/socket.io/socket.io.js"></script>
       <!--script src="http://code.jquery.com/jquery-1.11.1.js"></script-->
@@ -17,6 +18,16 @@
 
 <body>
     <div id="wrapper">
+        <div class="tool-bar divs">
+            <a href="#" id="eraser"><i class="fa fa-eraser"></i></a>
+            <a href="#" id="large" class="dot-size"><i class="fa fa-circle"></i></a>
+            <a href="#" id="medium" class="dot-size"><i class="fa fa-circle"></i></a>
+            <a href="#" id="small" class="dot-size"><i class="fa fa-circle"></i></a>
+            <!--a href="#"><i class="fa fa-eyedropper"></i></a-->
+            <input id="palette" type="color">
+            <!--a href="#"><i class="fa fa-paint-brush"></i></a-->
+            <a href="#" id="trash"><i class="fa fa-trash"></i></a>
+        </div>
         <div id="draw" class="divs" oncontextmenu="return false;">
             <div class="draw-header">
                 <!--div class="headeritem" id="roomid"><span class="seconds">99</span></div></div-->
@@ -37,7 +48,7 @@
             <!--onmousemove="highlightcanvas(event)" onmouseout="dehighlightcanvas()"-->
         </div>
         <div id="chat" class="divs">
-            <div class="chat-header"><!--div class="user-profile inactive"><h2>Ready</h2></div><span>lol</span--></div>
+            <div class="chat-header"></div>
             <div id="msgarea">
             </div>
             <form class="send" action="">

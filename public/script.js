@@ -20,6 +20,7 @@ jQuery(function($){
             IO.socket.on('updateInfo', App.updateInfo);
             IO.socket.on('updateScoreBoard', Draw.updateScoreBoard);
             IO.socket.on('updateCanvas', Draw.updateCanvas);
+            IO.socket.on('clearCanvas', Draw.clearCanvas);
 
             IO.socket.on('updateReadyCountDown', App.updateReadyCountDown);
             IO.socket.on('countDownFinish', App.onCountDownFinish);
@@ -114,7 +115,7 @@ jQuery(function($){
             //send notify message
             App.updateInfo('-- \'' + data.playerName + '\' joined game --');
             if(data.playerId == App.mySocketId) {
-                App.updateInfo('-- Press icon for ready --');
+                App.updateInfo('-- Click icon for ready --');
             }
             //add icon to chat header
             App.addIcon(data);
@@ -214,7 +215,7 @@ jQuery(function($){
         showReadyCountDown: function (data) {
             // Update state
             App.gameState = STATES.READY;
-
+            Draw.$tool_bar.css('visibility', 'hidden');
             // Clear canvas
             Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
             $('#hint').html('<p class="saving"><span>.</span><span>.</span><span>.</span></p>');
@@ -256,6 +257,7 @@ jQuery(function($){
 
             if(App.myRole === 'drawer') {
                 $('#hint').html(data);
+                Draw.$tool_bar.css('visibility', 'visible');
                 App.countDown(60, 'sendGameCountDown', function () {
                     IO.socket.emit('gameCountDownFinish', {gameId: App.gameId});
                 })
@@ -301,7 +303,7 @@ jQuery(function($){
          *                             *
          *******************************/
         pos: {
-            fx: 0, fy: 0, tx: 0, ty: 0, color: '#000'
+            fx: 0, fy: 0, tx: 0, ty: 0, color: '#000', lineWidth: 5
         },
         drawing: false,
         mov: false,
@@ -319,23 +321,78 @@ jQuery(function($){
             Draw.$canvas = $('#canv');
             Draw.$canvas_parent = $('#draw');
             Draw.$ctx = $('#canv')[0].getContext('2d');
-
-            var canvas = document.getElementById('canv');
-            var canvas_parent = document.getElementById('draw');
-            Draw.deltax = canvas.offsetLeft + canvas_parent.offsetLeft;
-            Draw.deltay = canvas.offsetTop + canvas_parent.offsetTop;
-
-            //console.log('deltax: ' + Draw.deltax + ' ' + JSON.stringify(Draw.$canvas));
-            //console.log('deltay: ' + Draw.deltay + ' ' + JSON.stringify(Draw.$canvas_parent));
+            Draw.$ctx.lineCap = 'round';
+            Draw.$tool_bar = $('.tool-bar');
+            Draw.$eraser = $('#eraser');
+            Draw.eraser = false;
+            Draw.$dot_size = $('.dot-size');
+            Draw.$large = $('#large');
+            Draw.$medium = $('#medium');
+            Draw.$small = $('#small');
+            Draw.$palette = $('#palette');
+            Draw.$trash = $('#trash');
         },
 
         bindEvents: function () {
+            Draw.$eraser.on('click', function(){
+                if(!Draw.eraser) {
+                    Draw.prev_color = Draw.pos.color;
+                    Draw.pos.color = '#F0F8FF';
+                    Draw.$eraser.addClass('active');
+                } else {
+                    Draw.pos.color = Draw.prev_color;
+                    Draw.$eraser.removeClass('active');
+                }
+                Draw.eraser = !Draw.eraser;
+            });
+
+            Draw.$large.on('click', function () {
+                Draw.pos.lineWidth = 15;
+                Draw.$dot_size.removeClass('active');
+                Draw.$large.addClass('active');
+            });
+
+            Draw.$medium.on('click', function () {
+                Draw.pos.lineWidth = 10;
+                Draw.$dot_size.removeClass('active');
+                Draw.$medium.addClass('active');
+            });
+
+            Draw.$small.on('click', function () {
+                Draw.pos.lineWidth = 5;
+                Draw.$dot_size.removeClass('active');
+                Draw.$small.addClass('active');
+            });
+
+            Draw.$palette.on('change', function () {
+                Draw.pos.color = Draw.$palette.val();
+            });
+
+            Draw.$trash.on('click', function () {
+                if(App.gameState == STATES.PLAY && App.myRole == 'drawer') {
+                    IO.socket.emit('trash', App.gameId);
+                }
+            });
+
             Draw.$canvas.mousedown(function (e) {
                 e.preventDefault();
-                console.log('downed');
-                Draw.pos.fx = e.pageX - Draw.deltax;
-                Draw.pos.fy = e.pageY - Draw.deltay;
-                Draw.drawing = true;
+                switch (e.which) {
+                    case 1:
+                        //console.log('left mouse down');
+                        //Draw.$canvas.css('cursor', 'crosshair' );
+                        Draw.pos.fx = e.pageX - Draw.$canvas.offset().left;
+                        Draw.pos.fy = e.pageY - Draw.$canvas.offset().top;
+                        Draw.drawing = true;
+                        break;
+                    case 3:
+                        //console.log('right mouse down');
+                        //Draw.$canvas.css('cursor', 'move' );
+                        Draw.pos.fx = e.pageX - Draw.$canvas.offset().left;
+                        Draw.pos.fy = e.pageY - Draw.$canvas.offset().top;
+                        Draw.pos.color = '#F0F8FF';
+                        Draw.drawing = true;
+                        break;
+                }
             });
 
             Draw.$canvas.mouseup(function () {
@@ -344,11 +401,10 @@ jQuery(function($){
 
             var prev = $.now();
             Draw.$canvas.mousemove(function (e) {
-                console.log('moved');
                 if(App.myRole === 'drawer' || App.gameState !== STATES.PLAY) {
                     if ($.now() - prev > 25) {
-                        Draw.pos.tx = e.pageX - Draw.deltax;
-                        Draw.pos.ty = e.pageY - Draw.deltay;
+                        Draw.pos.tx = e.pageX - Draw.$canvas.offset().left;
+                        Draw.pos.ty = e.pageY - Draw.$canvas.offset().top;
                         if(Draw.drawing) {
                             IO.socket.emit('draw', {gameId: App.gameId, pos: Draw.pos});
                         }
@@ -373,15 +429,18 @@ jQuery(function($){
                 }
             });
         },
+        clearCanvas: function () {
+            Draw.$ctx.clearRect(0, 0, Draw.$canvas.width(), Draw.$canvas.height());
+        },
 
         updateCanvas: function(data) {
             Draw.$ctx.beginPath();
-            Draw.$ctx.lineJoin="round";
+            //Draw.$ctx.lineJoin="round";
             Draw.$ctx.moveTo(data.fx, data.fy);
             Draw.$ctx.lineTo(data.tx, data.ty);
             //Draw.$ctx.quadraticCurveTo(data.tx, data.ty);
-            Draw.$ctx.lineWidth = 5;
-            Draw.$ctx.lineCap = 'round';
+            Draw.$ctx.lineWidth = data.lineWidth;
+            Draw.$ctx.strokeStyle = data.color;
             Draw.$ctx.stroke();
         },
 
@@ -394,7 +453,7 @@ jQuery(function($){
             var lh = 45; // line height
             var n = Object.keys(data).length;
             var os = (22 * n + lh * (n - 1)) / 3;
-            var i = 0;
+            var i = 1;
 
             var text = '';
             for(var i in data) {

@@ -47,6 +47,7 @@ exports.initGame = function(pio, socket, roomCache){
     socket.on('gameCountDownFinish', gameCountDownFinish);
     // Canvas events
     socket.on('draw', draw);
+    socket.on('trash', trash);
     socket.on('disconnect', function () {
         console.log('--- Disconnect --- ' + socket.id + ' gameId: ' + socket.gameId);
         //console.log(JSON.stringify(cache[socket.gameId]));
@@ -301,4 +302,7 @@ function countDown(gameId, sec, callback) {
 
 function draw(data) {
     io.sockets.in(data.gameId).emit('updateCanvas', data.pos);
+}
+function trash(gameId) {
+    io.sockets.in(gameId).emit('clearCanvas');
 }
