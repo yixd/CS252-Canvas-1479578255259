@@ -103,7 +103,7 @@ body {
     align-content: center;
     align-items: center;
     margin: 0 auto;
-    //visibility: hidden;
+    visibility: hidden;
 }
 #draw {
     margin: 100px auto;
