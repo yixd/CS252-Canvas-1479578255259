@@ -281,6 +281,8 @@ function readyCountDown(gameId) {
 
 function countDown(gameId, sec, callback) {
     var timeInterval = setInterval(ticTac, 1000);
+    (new Audio()).canPlayType("audio/ogg; codecs=vorbis");
+    var snd = new Audio ("countdown_beep.mp3");
     function ticTac() {
         sec--;
         if(cache[gameId].gameState == STATES.ERROR) {
@@ -293,10 +295,10 @@ function countDown(gameId, sec, callback) {
         io.sockets.in(gameId).emit('updateReadyCountDown', ('0' + sec).slice(-2));
         //console.log('t: ' + ('0' + sec).slice(-2));
         if (sec == 10) {
-            var snd = new Audio("countdown_beep.mp3");
             snd.play();
         }
         else if (sec <= 0) {
+            snd.currentTime = 0;
             clearInterval(timeInterval);
             callback();
             return;
