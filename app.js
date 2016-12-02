@@ -25,29 +25,30 @@ var http = app.listen(appEnv.port, '0.0.0.0', function () {
  *            REDIS            *
  *                             *
  *******************************/
+// Util is handy to have around, so thats why that's here.
+const util = require('util')
+// and so is assert
+const assert = require('assert');
+
 var redis = require('redis');
 
-var credentials;
-// Check if we are in Bluemix or localhost
-if(process.env.VCAP_SERVICES) {
-    // On Bluemix read connection settings from
-    // VCAP_SERVICES environment variable
-    var env = JSON.parse(process.env.VCAP_SERVICES);
-    credentials = env['redis-2.6'][0]['credentials'];
-} else {
-    // On localhost just hardcode the connection details
-    credentials = { "host": "127.0.0.1", "port": 6379 }
-}
+var services = appEnv.services;
+var redis_services = services["compose-for-redis"];
 
-var redisClient =  redis.createClient(credentials.port, credentials.host);
 
-if('password' in credentials) {
-    // On Bluemix we need to authenticate against Redis
-    redisClient.auth(credentials.password);
-}
+// This check ensures there is a services for Redis databases
+assert(!util.isUndefined(redis_services), "Must be bound to compose-for-redis services");
 
-redisClient.on('connect', function () {
-    console.log('redis connected');
+// We now take the first bound Redis service and extract it's credentials object
+var credentials = redis_services[0].credentials;
+
+/// This is the Redis connection. From the application environment, we got the
+// credentials and the credentials contain a URI for the database. Here, we
+// connect to that URI
+var client=redis.createClient(credentials.uri);
+
+client.on("error", function (err) {
+    console.log("Error " + err);
 });
 
 
